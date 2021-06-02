@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WME Store Closer
 // @namespace    https://github.com/jm6087/
-// @version      2021.06.02.02
+// @version      2021.06.02.03
 // @description  Small script to set store to closed status and change hours.
 // @include      /^https:\/\/(www|beta)\.waze\.com\/(?!user\/)(.{2,6}\/)?editor\/?.*$/
 // @exclude      https://www.waze.com/user/editor*
@@ -25,13 +25,14 @@
     var SCRIPT_NAME = GM_info.script.name;
     let UpdateObj;
     var hoursparser;
+    let typeClosed = ' (closed)';
 
     function ClosedVenue(){
         var selected = W.selectionManager.getSelectedFeatures()[0].model;
         var att = selected.attributes;
         var origName = att.name;
-        let closedName1 = origName + ' (Closed)'
-        let pasteHours = "W 3:11 to 3:12"
+        let closedName1 = origName + typeClosed;
+        let pasteHours = "W 3:11 to 3:12";
         var parserResult = hoursparser.parseHours(pasteHours);
 
         let UpdateObject = require("Waze/Action/UpdateObject");
