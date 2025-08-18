@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         WME Store Closer
 // @namespace    https://github.com/jm6087/
-// @version      2021.06.02.03
+// @version      2025.08.18.01
 // @description  Small script to set store to closed status and change hours.
 // @include      /^https:\/\/(www|beta)\.waze\.com\/(?!user\/)(.{2,6}\/)?editor\/?.*$/
 // @exclude      https://www.waze.com/user/editor*
 // @require      https://greasyfork.org/scripts/24851-wazewrap/code/WazeWrap.js
 // @require      https://greasyfork.org/scripts/37486-wme-utils-hoursparser/code/WME%20Utils%20-%20HoursParser.js
 // @author       jm6087
-// @grant        none
+// @grant        unsafeWindow
 // ==/UserScript==
 
 /* global W */
@@ -18,6 +18,15 @@
 /* global MultiAction */
 /* global require */
 
+let sdk;
+unsafeWindow.SDK_INITIALIZED.then(() => {
+    if (!unsafeWindow.getWmeSdk) {
+        throw new Error("SDK is not installed");
+    }
+    sdk = unsafeWindow.getWmeSdk({ scriptId: "wme-store-closer", scriptName: "WME Store Closer" });
+    console.log(`SDK v ${sdk.getSDKVersion()} on ${sdk.getWMEVersion()} initialized`);
+//     sdk.Events.once({ eventName: "wme-ready" }).then(wmestore);
+});
 (function(){
     'use strict';
     var UPDATE_NOTES = ''
@@ -28,7 +37,8 @@
     let typeClosed = ' (closed)';
 
     function ClosedVenue(){
-        var selected = W.selectionManager.getSelectedFeatures()[0].model;
+        var selected = W.selectionManager.getSelectedWMEFeatures()[0]._wmeObject;
+//        var selected = sdk.Editing.getSelection().ids[0];
         var att = selected.attributes;
         var origName = att.name;
         let closedName1 = origName + typeClosed;
@@ -58,10 +68,11 @@
 
     // Function the selection listener runs to display the button when an object is selected
     function displayButton() {
-        const sel1 = W.selectionManager.getSelectedFeatures();
+//        const sel1 = W.selectionManager.getSelectedFeatures();
+        const sel1 = sdk.Editing.getSelection();
 
-        if (sel1.length > 0) {
-            if(sel1[0].model.type == 'venue') {
+        if (sel1.ids.length > 0) {
+            if(sel1.objectType == 'venue') {
                 $('#MyclosedVenueContainer').css('display', 'block');
             } else {
                 $('#MyclosedVenueContainer').css('display', 'none');
@@ -82,4 +93,5 @@
             setTimeout(function () {bootstrap(++tries);}, 200);
     }
     bootstrap();
+
 })();
